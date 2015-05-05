@@ -5,9 +5,11 @@
  */
 package edu.ub.prog2.DempereGuillermoGerman.controlador;
 
+import edu.ub.prog2.DempereGuillermoGerman.model.BibliotecaImatges;
 import edu.ub.prog2.DempereGuillermoGerman.model.DadesVisor;
 import edu.ub.prog2.DempereGuillermoGerman.model.Imatge;
 import edu.ub.prog2.utils.BasicCtrl;
+import edu.ub.prog2.utils.ImageFile;
 import edu.ub.prog2.utils.ImageList;
 import edu.ub.prog2.utils.VisorException;
 import java.io.FileInputStream;
@@ -40,6 +42,25 @@ public class CtrlVisor extends BasicCtrl {
             System.out.println(ex.getMessage());
             return false;
         }
+    }
+
+    public boolean removeImageFromList(ImageFile img, ImageList list) {
+        try {
+            list.removeImage(img);
+
+            // Si eliminen de la biblioteca, eliminar a tot arreu
+            if (list instanceof BibliotecaImatges) {
+                for (ImageList al : getData().getAlbums()) {
+                    al.removeImage(img);
+                }
+            }
+
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+            return false;
+        }
+        
+        return true;
     }
 
     public DadesVisor getData() {

@@ -2,7 +2,6 @@ package edu.ub.prog2.DempereGuillermoGerman.vista;
 
 import edu.ub.prog2.DempereGuillermoGerman.controlador.CtrlVisor;
 import edu.ub.prog2.DempereGuillermoGerman.model.AlbumImatges;
-import edu.ub.prog2.DempereGuillermoGerman.model.BibliotecaImatges;
 import edu.ub.prog2.utils.ImageFile;
 import edu.ub.prog2.utils.ImageList;
 import java.util.Scanner;
@@ -386,11 +385,9 @@ public class VisorUB2 implements VisorUB {
     }
 
     public void imageRemoveForm(ImageList list) {
-
         System.out.println("");
         System.out.println("Eliminar una imatge");
         System.out.println("-------------------");
-
         showImageList(list);
 
         System.out.print("Index a eliminar (-1 per sortir): ");
@@ -399,16 +396,15 @@ public class VisorUB2 implements VisorUB {
         // Comprobació de rang, si es valid eliminar la imatge
         if (delIndex >= 0 && delIndex < list.getSize()) {
             ImageFile removed = list.getAt(delIndex);
-            list.removeImage(removed);
-            
-            // Si eliminen de la biblioteca, eliminar a tot arreu
-            if(list instanceof BibliotecaImatges){
-                for(ImageList al : ctrl.getData().getAlbums())
-                    al.removeImage(removed);
+            if (ctrl.removeImageFromList(removed, list)) {
+                System.out.println("Imatge eliminada.");
+                return;
+            } else {
+                System.out.println("Error eliminat la imatge.");
+                return;
             }
-            
-            System.out.println("Imatge eliminada.");
         }
+        System.out.println("Eliminació cancelada.");
     }
 
     // IMAGELIST HELPER METHODS
