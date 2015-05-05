@@ -1,10 +1,19 @@
 package edu.ub.prog2.DempereGuillermoGerman.model;
 
+import edu.ub.prog2.DempereGuillermoGerman.vista.GestioVisorUB;
 import java.util.Date;
 
 import edu.ub.prog2.utils.ImageFile;
+import java.awt.BorderLayout;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Objects;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 /**
  * Class containing an Image file reference and intrinsic data about the image.
@@ -51,6 +60,22 @@ public class Imatge extends ImageFile {
      */
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    private BufferedImage img;
+
+    @Override
+    public void show(JPanel panel, boolean modal) {
+        try {
+            img = ImageIO.read(new File(getAbsolutePath()));
+            JLabel imgLabel = new JLabel(new ImageIcon(img), JLabel.CENTER);
+            panel.add(imgLabel, BorderLayout.NORTH);
+            panel.repaint();
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**

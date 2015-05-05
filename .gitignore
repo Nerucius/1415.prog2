@@ -6,6 +6,7 @@
 # Netbeans
 dist/
 build/
+Thumbs.db
 
 # Package Files #
 #*.jar

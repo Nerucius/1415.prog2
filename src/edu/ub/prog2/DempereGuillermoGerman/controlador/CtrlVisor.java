@@ -8,6 +8,7 @@ package edu.ub.prog2.DempereGuillermoGerman.controlador;
 import edu.ub.prog2.DempereGuillermoGerman.model.DadesVisor;
 import edu.ub.prog2.DempereGuillermoGerman.model.Imatge;
 import edu.ub.prog2.utils.BasicCtrl;
+import edu.ub.prog2.utils.ImageFile;
 import edu.ub.prog2.utils.ImageList;
 import edu.ub.prog2.utils.VisorException;
 import java.io.FileInputStream;
@@ -29,6 +30,27 @@ public class CtrlVisor extends BasicCtrl {
         this.data = new DadesVisor();
     }
 
+    /**
+     * Method to remove from all albums and finally from the library
+     */
+    public boolean removeImageFromAll(ImageFile img) {
+        try {
+            for (ImageList al : getData().getAlbums()) {
+                al.removeImage(img);
+            }
+            getData().getLib().removeImage(img);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+
+    }
+
+    /**
+     * Helpful method to add an image to a list, only requiring the Image
+     * name/tile and the absolute or relative path.
+     * @return Success state.
+     */
     public boolean addImageToList(String imgName, String imgPath, ImageList list) {
         try {
             Imatge newImg = new Imatge(imgPath);
