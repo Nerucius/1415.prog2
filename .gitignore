@@ -5,6 +5,7 @@
 
 # Netbeans
 dist/
+build/
 
 # Package Files #
 #*.jar
