@@ -1,10 +1,7 @@
 package edu.ub.prog2.DempereGuillermoGerman.model;
 
 import edu.ub.prog2.utils.ImageFile;
-import edu.ub.prog2.utils.ImageList;
 import edu.ub.prog2.utils.VisorException;
-import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * Classe del album d'imatges. Guarda imatges repetides o no en una llista de
@@ -14,18 +11,15 @@ import java.util.Iterator;
  *
  * @author German
  */
-public class AlbumImatges extends ImageList {
+public class AlbumImatges extends LlistaImatges {
 
-    private final int maxCap;
     private ImageFile cover;
     private String title;
     private String author;
 
     public AlbumImatges(int maxCap) {
-        super();
-        setList(new ArrayList<ImageFile>(maxCap));
+        super(maxCap);
 
-        this.maxCap = maxCap;
         this.cover = null;
         this.title = "Default Title";
         this.author = "Default Author";
@@ -36,36 +30,20 @@ public class AlbumImatges extends ImageList {
     }
 
     @Override
-    public void addImage(ImageFile i) throws VisorException {
-        if (getList().size() <= maxCap) {
-            getList().add(i);
-
-            // Si a la llista hi ha nomes una imatge, posarla com a cover;
-            if (getList().size() == 1) {
-                this.cover = this.getAt(0);
-            }
-
-        } else {
-            throw new VisorException("Album ple.");
-        }
-
+    public void addImage(ImageFile img) throws VisorException {
+        super.addImage(img);
+        // Si es la primera imatge que s'afegeix, sera la nova
+        // caratula
+        if(getList().size() == 1)
+            this.cover = getAt(0);
     }
 
     @Override
     public void removeImage(ImageFile image) {
-        Iterator<ImageFile> iter = getList().iterator();
-
-        // Removes all matching elements in the ArrayList
-        while (iter.hasNext()) {
-            if (image.equals(iter.next())) {
-                iter.remove();
-            }
-        }
-        // Si a la llista hi ha nomes una imatge, posarla com a cover;
-        if (getList().size() == 1) {
-            this.cover = this.getAt(0);
-        }
-
+        super.removeImage(image);
+        // Si ens carregem la caratula, posarla a null
+        if(cover.equals(image))
+            this.cover = null;
     }
 
     // ALBUM METHODS
@@ -93,30 +71,8 @@ public class AlbumImatges extends ImageList {
         this.author = author;
     }
 
-    // IMAGELIST METHODS
-    @Override
-    public int getSize() {
-        return getList().size();
-    }
-
-    @Override
-    public ImageFile getAt(int i) {
-        return getList().get(i);
-    }
-
-    @Override
-    public void clear() {
-        getList().clear();
-    }
-
-    @Override
-    public boolean isFull() {
-        return getList().size() >= maxCap;
-    }
-
     @Override
     public String toString() {
         return "[Album] " + this.getTitle() + ", creat per " + this.getAuthor() + ".";
     }
-
 }

@@ -272,7 +272,7 @@ public class VisorUB2 implements VisorUB {
         System.out.println("");
         System.out.println("Eliminar un album");
         System.out.println("-----------------");
-        ArrayList<ImageList> albums = ctrl.getData().getAlbums();
+        ArrayList<AlbumImatges> albums = ctrl.getData().getAlbums();
 
         if (albums.size() <= 0) {
             System.out.println("No hi ha albums.");
@@ -294,7 +294,7 @@ public class VisorUB2 implements VisorUB {
         System.out.println("");
         System.out.println("Selecciona un album");
         System.out.println("-------------------");
-        ArrayList<ImageList> albums = ctrl.getData().getAlbums();
+        ArrayList<AlbumImatges> albums = ctrl.getData().getAlbums();
 
         if (albums.size() <= 0) {
             System.out.println("No hi ha albums.");

@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.Objects;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -51,6 +52,26 @@ public class Imatge extends ImageFile {
         this.fileName = comps[comps.length - 1];
         this.fileExt = this.fileName.split("\\.")[1].toLowerCase();
     }
+    
+    public boolean saveImageToFile(String path) throws IOException{
+        
+        
+        return false;
+    }
+    
+        @Override
+    public JDialog show(boolean modal) throws IOException, Exception {
+        JDialog dialog = new JDialog();
+        //dialog.setUndecorated(true);
+        JLabel label = new JLabel(new ImageIcon(getImage()));
+        dialog.add(label);
+        dialog.setModal(modal);
+        dialog.pack();
+        dialog.setVisible(true);
+        dialog.setResizable(false);
+        
+        return dialog;
+    }
 
     /**
      * Sets the Name/Title of the image, will be saved along the image to the
@@ -60,22 +81,6 @@ public class Imatge extends ImageFile {
      */
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    private BufferedImage img;
-
-    @Override
-    public void show(JPanel panel, boolean modal) {
-        try {
-            img = ImageIO.read(new File(getAbsolutePath()));
-            JLabel imgLabel = new JLabel(new ImageIcon(img), JLabel.CENTER);
-            panel.add(imgLabel, BorderLayout.NORTH);
-            panel.repaint();
-            
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
     }
 
     /**

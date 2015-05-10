@@ -17,6 +17,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JDialog;
 
 /**
  *
@@ -42,14 +46,64 @@ public class CtrlVisor extends BasicCtrl {
         } catch (Exception e) {
             return false;
         }
+        
         return true;
 
     }
+    
+    private ImageList playList;
+    /** Index of the image currently playing */
+    private int plCurrent;
+    private JDialog activeDialog;
+    private boolean playing = false;
+    
+    public void play(ImageList list){
+        this.playList = list;
+        this.plCurrent = 0;   
+        this.playing = true;
+        
+        try {
+            startTimer();
+        } catch (VisorException ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    public void stopPlay(){
+        this.playing = false;
+        try {
+            stopTimer();
+        } catch (VisorException ex) {
+            ex.printStackTrace();
+        }
+        
+        if(activeDialog != null) activeDialog.dispose();
+    }
 
+    @Override
+    public void onTimer(){
+        // Close previous dialog
+        if(activeDialog != null) activeDialog.dispose();
+        
+
+        try {
+            // If we reach the end, stop reproduction
+            if (plCurrent == playList.getSize()){
+                stopPlay();
+                return;
+            }
+            
+            // Otherwise keep playing
+            activeDialog = playList.getAt(plCurrent).show(false);
+            plCurrent++;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    
     /**
      * Helpful method to add an image to a list, only requiring the Image
      * name/tile and the absolute or relative path.
-     * @return Success state.
      */
     public boolean addImageToList(String imgName, String imgPath, ImageList list) {
         try {

@@ -3,6 +3,8 @@ package edu.ub.prog2.DempereGuillermoGerman.vista;
 import edu.ub.prog2.DempereGuillermoGerman.controlador.CtrlVisor;
 import edu.ub.prog2.DempereGuillermoGerman.model.AlbumImatges;
 import edu.ub.prog2.DempereGuillermoGerman.model.BibliotecaImatges;
+import edu.ub.prog2.DempereGuillermoGerman.model.ImatgeBN;
+import edu.ub.prog2.DempereGuillermoGerman.model.ImatgeSepia;
 import edu.ub.prog2.utils.ImageFile;
 import edu.ub.prog2.utils.ImageList;
 import java.util.Scanner;
@@ -36,10 +38,11 @@ public class VisorUB3 implements VisorUB {
     private enum LibraryMenuOPT {
 
         ADD_IMG,
-        SHOW_LIB,
+        LIST_IMG,
         REMOVE_IMG,
         VIEW_IMG,
         TRANSFORM_IMG,
+        VIEW_LIB,
         GO_BACK,
     };
 
@@ -48,7 +51,7 @@ public class VisorUB3 implements VisorUB {
 
         VIEW,
         VIEW_SEPIA,
-        VIEW_BNW,
+        VIEW_BW,
         GO_BACK
     };
 
@@ -56,7 +59,7 @@ public class VisorUB3 implements VisorUB {
     private enum TransformImageMenuOPT {
 
         TRANS_SEPIA,
-        TRANS_BNW,
+        TRANS_BW,
         TRANS_NORMAL,
         GO_BACK
     };
@@ -65,7 +68,7 @@ public class VisorUB3 implements VisorUB {
     private enum AlbumsMenuOPT {
 
         ADD_ALBUM,
-        SHOW_ALBUMS,
+        LIST_ALBUM,
         REMOVE_ALBUM,
         ALBUM,
         GO_BACK,
@@ -75,11 +78,12 @@ public class VisorUB3 implements VisorUB {
     private enum AlbumMenuOPT {
 
         ADD_IMG,
-        SHOW_ALBUM,
+        LIST_IMG,
         REMOVE_IMG,
         VIEW_IMG,
         TRANSFORM_IMG,
         EDIT_ALBUM,
+        VIEW_ALBUM,
         GO_BACK,
     };
 
@@ -93,10 +97,11 @@ public class VisorUB3 implements VisorUB {
 
     private final String[] libraryMenuSTR = {
         "Afegir Imatge",
-        "Mostrar tota la biblioteca",
+        "Llista d'Imatges",
         "Eliminar Imatge",
-        "Veure Imatge",
+        "Visualitzar Imatge",
         "Transformar Imatge",
+        "Visualitzar la llibreria.",
         "Tornar"
     };
 
@@ -129,6 +134,7 @@ public class VisorUB3 implements VisorUB {
         "Veure Imatge",
         "Transformar Imatge",
         "Modificar Dades",
+        "Veure Album",
         "Tornar"
     };
 
@@ -224,13 +230,13 @@ public class VisorUB3 implements VisorUB {
 
         while (opt != LibraryMenuOPT.GO_BACK) {
             libraryMenu.mostrarMenu();
-            opt = libraryMenu.getOpcio(sc);
+            //opt = libraryMenu.getOpcio(sc);
 
-            switch (opt) {
+            switch (opt = libraryMenu.getOpcio(sc)) {
                 case ADD_IMG:
                     addImageForm(lib);
                     break;
-                case SHOW_LIB:
+                case LIST_IMG:
                     System.out.println("\nImatges a la Llibreria:");
                     System.out.println("-----------------------");
                     showImageList(lib);
@@ -245,6 +251,10 @@ public class VisorUB3 implements VisorUB {
                 case TRANSFORM_IMG:
                     transformImageForm(lib);
                     break;
+                case VIEW_LIB:
+                    playListForm(lib);
+                    break;
+
                 case GO_BACK:
                     break;
             }
@@ -262,7 +272,7 @@ public class VisorUB3 implements VisorUB {
                 case ADD_ALBUM:
                     addAlbumForm();
                     break;
-                case SHOW_ALBUMS:
+                case LIST_ALBUM:
                     System.out.println("Llista d'albums");
                     System.out.println("---------------");
                     showAlbumList();
@@ -298,9 +308,9 @@ public class VisorUB3 implements VisorUB {
 
             switch (opt) {
                 case ADD_IMG:
-                    imageAddToAlbumForm(album);
+                    addImageToAlbumForm(album);
                     break;
-                case SHOW_ALBUM:
+                case LIST_IMG:
                     System.out.println("\nImatges a l'album:");
                     System.out.println("------------------");
                     showImageList(album);
@@ -324,46 +334,86 @@ public class VisorUB3 implements VisorUB {
         }
     }
 
+    private void playListForm(ImageList list) {
+        System.out.print("Temps de repoducció en ms: ");
+        ctrl.setTimer(Integer.parseInt(sc.nextLine()));
+        ctrl.play(list);
+        System.out.print("Prem enter per terminar...");
+        sc.nextLine();
+        ctrl.stopPlay();
+
+    }
+
     private void viewImageForm(ImageList list) {
+        if (list.getList().isEmpty()) {
+            System.out.println("La llista esta buida.");
+            return;
+        }
+
         System.out.println("");
         System.out.println("Selecciona la Imatge");
         System.out.println("--------------------");
-        showImageList(list);
-
-        int imgIndex = -1;
-        while (imgIndex < 0 || imgIndex >= list.getSize()) {
-            imgIndex = sc.nextInt() - 1;
-        }
-
-        ImageFile img = list.getAt(imgIndex);
+        ImageFile img = getImageFromList(list);
 
         ViewImageMenuOPT opt = null;
 
         while (opt != ViewImageMenuOPT.GO_BACK) {
             viewImageMenu.mostrarMenu();
+            opt = viewImageMenu.getOpcio(sc);
 
-            switch (viewImageMenu.getOpcio(sc)) {
-                case VIEW:
-                    try {
-                        System.out.println("Showing Image...");
-                        img.show(GestioVisorUB.imgPanel, false);
-                    } catch (Exception e) {
-                        System.out.println("Failed to show");
-                    }
-                    break;
-                case VIEW_SEPIA:
-                    break;
-                case VIEW_BNW:
-                    break;
-                case GO_BACK:
-                    return;
+            try {
+                switch (opt) {
+                    case VIEW:
+                        img.show(true);
+                        break;
 
+                    case VIEW_SEPIA:
+                        new ImatgeSepia(img).show(true);
+                        break;
+
+                    case VIEW_BW:
+                        new ImatgeBN(img).show(true);
+                        break;
+
+                    case GO_BACK:
+                        break;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Error al mostrar la Imatge.");
             }
         }
 
     }
 
     private void transformImageForm(ImageList list) {
+        System.out.println("");
+        System.out.println("Selecciona la Imatge");
+        System.out.println("--------------------");
+        ImageFile img = getImageFromList(list);
+
+        TransformImageMenuOPT opt = null;
+
+        while (opt != TransformImageMenuOPT.GO_BACK) {
+            transformImageMenu.mostrarMenu();
+            opt = transformImageMenu.getOpcio(sc);
+
+            try {
+                switch (opt) {
+                    case TRANS_SEPIA:
+                        break;
+                    case TRANS_BW:
+                        break;
+                    case TRANS_NORMAL:
+                        break;
+                    case GO_BACK:
+                        break;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Error al transformar la Imatge.");
+            }
+        }
 
     }
 
@@ -392,7 +442,7 @@ public class VisorUB3 implements VisorUB {
         System.out.println("");
         System.out.println("Eliminar un album");
         System.out.println("-----------------");
-        ArrayList<ImageList> albums = ctrl.getData().getAlbums();
+        ArrayList<AlbumImatges> albums = ctrl.getData().getAlbums();
 
         if (albums.size() <= 0) {
             System.out.println("No hi ha albums.");
@@ -414,7 +464,7 @@ public class VisorUB3 implements VisorUB {
         System.out.println("");
         System.out.println("Selecciona un album");
         System.out.println("-------------------");
-        ArrayList<ImageList> albums = ctrl.getData().getAlbums();
+        ArrayList<AlbumImatges> albums = ctrl.getData().getAlbums();
 
         if (albums.size() <= 0) {
             System.out.println("No hi ha albums.");
@@ -423,16 +473,16 @@ public class VisorUB3 implements VisorUB {
 
         showAlbumList();
         System.out.print("Numero del album: ");
-        int alIndex = sc.nextInt() - 1;
+        int index = sc.nextInt() - 1;
 
-        if (alIndex >= 0 && alIndex < albums.size()) {
-            albumMenu(albums.get(alIndex));
+        if (index >= 0 && index < albums.size()) {
+            albumMenu(albums.get(index));
         } else {
             System.out.println("No existeix l'album.");
         }
     }
 
-    private void imageAddToAlbumForm(ImageList list) {
+    private void addImageToAlbumForm(ImageList list) {
         if (!(list instanceof AlbumImatges)) {
             System.out.println("Hi ha hagut un error.");
             return;
@@ -565,6 +615,22 @@ public class VisorUB3 implements VisorUB {
             System.out.println("\t" + i + ") " + img.toString());
             i++;
         }
+    }
+
+    /**
+     * Shows a list of images and then asks the user to select one of them.
+     */
+    private ImageFile getImageFromList(ImageList list) {
+        showImageList(list);
+        System.out.println("");
+
+        int imgIndex = -1;
+        while (imgIndex < 0 || imgIndex >= list.getSize()) {
+            System.out.print(">> ");
+            imgIndex = sc.nextInt() - 1;
+        }
+
+        return list.getAt(imgIndex);
     }
 
     /**

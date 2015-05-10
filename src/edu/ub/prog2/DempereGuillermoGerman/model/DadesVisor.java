@@ -6,27 +6,27 @@ import java.util.ArrayList;
 
 public class DadesVisor implements Serializable {
 
-    private final ImageList lib;
-    private final ArrayList<ImageList> albums;
+    private final BibliotecaImatges lib;
+    private final ArrayList<AlbumImatges> albums;
 
     public DadesVisor() {
         lib = new BibliotecaImatges();
-        albums = new ArrayList<ImageList>();
+        albums = new ArrayList<AlbumImatges>();
     }
 
     public ImageList getLib() {
         return this.lib;
     }
 
-    public void addAlbum(ImageList album){
+    public void addAlbum(AlbumImatges album){
         this.albums.add(album);
     }
     
-    public void removeAlbum(ImageList album){
+    public void removeAlbum(AlbumImatges album){
         albums.remove(album);
     }
     
-    public ArrayList<ImageList> getAlbums() {
+    public ArrayList<AlbumImatges> getAlbums() {
         return this.albums;
     }
     
