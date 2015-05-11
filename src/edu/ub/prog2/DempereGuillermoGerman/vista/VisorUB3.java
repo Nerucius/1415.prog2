@@ -3,6 +3,7 @@ package edu.ub.prog2.DempereGuillermoGerman.vista;
 import edu.ub.prog2.DempereGuillermoGerman.controlador.CtrlVisor;
 import edu.ub.prog2.DempereGuillermoGerman.model.AlbumImatges;
 import edu.ub.prog2.DempereGuillermoGerman.model.BibliotecaImatges;
+import edu.ub.prog2.DempereGuillermoGerman.model.Imatge;
 import edu.ub.prog2.DempereGuillermoGerman.model.ImatgeBN;
 import edu.ub.prog2.DempereGuillermoGerman.model.ImatgeSepia;
 import edu.ub.prog2.utils.ImageFile;
@@ -19,7 +20,7 @@ import java.util.ArrayList;
  */
 public class VisorUB3 implements VisorUB {
 
-    private static final boolean autoSaveAndLoad = true;
+    private static final boolean autoSaveAndLoad = false;
 
     private final Scanner sc;
     CtrlVisor ctrl;
@@ -58,9 +59,9 @@ public class VisorUB3 implements VisorUB {
     // LibraryMenu || AlbumMenu /TRANSFORM_IMG
     private enum TransformImageMenuOPT {
 
+        TRANS_NORMAL,
         TRANS_SEPIA,
         TRANS_BW,
-        TRANS_NORMAL,
         GO_BACK
     };
 
@@ -113,9 +114,9 @@ public class VisorUB3 implements VisorUB {
     };
 
     private final String[] transformImageMenuSTR = {
-        "Visualitzar Imatge",
-        "Visualitzar amb filtre Sepia",
-        "Visualitzar amb filtre Blanc&Negre",
+        "Treure filtres",
+        "Transformar a filtre Sepia",
+        "Transformar a filtre Blanc&Negre",
         "Tornar"
     };
 
@@ -171,7 +172,7 @@ public class VisorUB3 implements VisorUB {
         viewImageMenu = new Menu<>("Veure Imatges", ViewImageMenuOPT.values());
         viewImageMenu.setDescripcions(viewImageMenuSTR);
 
-        transformImageMenu = new Menu<>("Veure Imatges", TransformImageMenuOPT.values());
+        transformImageMenu = new Menu<>("Transformar Imatges", TransformImageMenuOPT.values());
         transformImageMenu.setDescripcions(transformImageMenuSTR);
 
         albumsMenu = new Menu<>("Albums", AlbumsMenuOPT.values());
@@ -266,9 +267,8 @@ public class VisorUB3 implements VisorUB {
 
         while (opt != AlbumsMenuOPT.GO_BACK) {
             albumsMenu.mostrarMenu();
-            opt = albumsMenu.getOpcio(sc);
 
-            switch (opt) {
+            switch (opt = albumsMenu.getOpcio(sc)) {
                 case ADD_ALBUM:
                     addAlbumForm();
                     break;
@@ -304,9 +304,8 @@ public class VisorUB3 implements VisorUB {
             System.out.println("TITOL: " + album.getTitle());
             System.out.println("AUTOR: " + album.getAuthor());
             albumMenu.mostrarMenu();
-            opt = albumMenu.getOpcio(sc);
 
-            switch (opt) {
+            switch (opt = albumMenu.getOpcio(sc)) {
                 case ADD_IMG:
                     addImageToAlbumForm(album);
                     break;
@@ -327,6 +326,9 @@ public class VisorUB3 implements VisorUB {
                     break;
                 case TRANSFORM_IMG:
                     transformImageForm(album);
+                    break;
+                case VIEW_ALBUM:
+                    playListForm(album);
                     break;
                 case GO_BACK:
                     break;
@@ -365,15 +367,15 @@ public class VisorUB3 implements VisorUB {
                 switch (opt) {
                     case VIEW:
                         img.show(true);
-                        break;
+                        return;
 
                     case VIEW_SEPIA:
                         new ImatgeSepia(img).show(true);
-                        break;
+                        return;
 
                     case VIEW_BW:
                         new ImatgeBN(img).show(true);
-                        break;
+                        return;
 
                     case GO_BACK:
                         break;
@@ -397,21 +399,34 @@ public class VisorUB3 implements VisorUB {
         while (opt != TransformImageMenuOPT.GO_BACK) {
             transformImageMenu.mostrarMenu();
             opt = transformImageMenu.getOpcio(sc);
+            boolean success = false;
 
             try {
                 switch (opt) {
                     case TRANS_SEPIA:
+                        success = ctrl.transformImage(img, list, Imatge.Type.SEPIA);
                         break;
                     case TRANS_BW:
+                        success = ctrl.transformImage(img, list, Imatge.Type.BLACKNWHITE);
                         break;
                     case TRANS_NORMAL:
+                        success = ctrl.transformImage(img, list, Imatge.Type.NORMAL);
                         break;
                     case GO_BACK:
                         break;
                 }
+                if (success) {
+                    System.out.println("Imatge transformada correctament");
+                    return;
+                }else{
+                    System.out.println("Error en la transformació");
+                    return;
+                }
+
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("Error al transformar la Imatge.");
+                return;
             }
         }
 
@@ -430,7 +445,7 @@ public class VisorUB3 implements VisorUB {
         System.out.print("Numero maxim d'imatges: ");
         int alCap = sc.nextInt();
 
-        AlbumImatges album = new AlbumImatges(Math.min(1, alCap));
+        AlbumImatges album = new AlbumImatges(Math.max(1, alCap));
         album.setTitle(alTitle);
         album.setAuthor(alAuthor);
         ctrl.getData().addAlbum(album);

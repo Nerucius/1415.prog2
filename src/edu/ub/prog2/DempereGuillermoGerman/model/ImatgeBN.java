@@ -20,22 +20,24 @@ import javax.swing.JLabel;
  */
 public class ImatgeBN extends Imatge {
 
-    private BufferedImage imageBN;
+    private transient BufferedImage imageBN;
 
     public ImatgeBN(String filePath) throws FileNotFoundException {
         super(filePath);
+        this.type = Type.BLACKNWHITE;
         this.imageBN = color2gray();
     }
-    
-    public ImatgeBN(ImageFile src) throws FileNotFoundException{
+
+    public ImatgeBN(ImageFile src) throws FileNotFoundException {
         super(src.getAbsolutePath());
     }
 
     @Override
     public JDialog show(boolean modal) throws IOException, Exception {
-        if(this.imageBN == null)
+        if (this.imageBN == null) {
             this.imageBN = color2gray();
-        
+        }
+
         JDialog dialog = new JDialog();
         //dialog.setUndecorated(true);
         JLabel label = new JLabel(new ImageIcon(imageBN));
@@ -44,7 +46,7 @@ public class ImatgeBN extends Imatge {
         dialog.pack();
         dialog.setVisible(true);
         dialog.setResizable(false);
-        
+
         return dialog;
     }
 
@@ -67,6 +69,21 @@ public class ImatgeBN extends Imatge {
         }
 
         return outImage;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("ImatgeBN {");
+        sb.append("nom: ").append(this.title).append(", ");
+        sb.append("data: ").append(this.lastModDate.toString()).append(", ");
+        sb.append("nom fitxer: ").append(this.getName()).append(", ");
+        sb.append("extensio: ").append(this.fileExt).append(", ");
+        sb.append("Cami complet: ").append(this.filePath);
+        sb.append("}");
+
+        return sb.toString();
     }
 
 }

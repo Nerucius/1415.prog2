@@ -5,8 +5,11 @@
  */
 package edu.ub.prog2.DempereGuillermoGerman.controlador;
 
+import edu.ub.prog2.DempereGuillermoGerman.model.BibliotecaImatges;
 import edu.ub.prog2.DempereGuillermoGerman.model.DadesVisor;
 import edu.ub.prog2.DempereGuillermoGerman.model.Imatge;
+import edu.ub.prog2.DempereGuillermoGerman.model.ImatgeBN;
+import edu.ub.prog2.DempereGuillermoGerman.model.ImatgeSepia;
 import edu.ub.prog2.utils.BasicCtrl;
 import edu.ub.prog2.utils.ImageFile;
 import edu.ub.prog2.utils.ImageList;
@@ -17,9 +20,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JDialog;
 
 /**
@@ -46,53 +46,89 @@ public class CtrlVisor extends BasicCtrl {
         } catch (Exception e) {
             return false;
         }
-        
+
         return true;
 
     }
-    
+
+    public boolean transformImage(ImageFile img, ImageList list, Imatge.Type type) {
+        Imatge newImg = null;
+
+        try {
+
+            // Create new Image
+            switch (type) {
+                case NORMAL:
+                    newImg = new Imatge(img.getAbsolutePath());
+                    break;
+                case SEPIA:
+                    newImg = new ImatgeSepia(img);
+                    break;
+                case BLACKNWHITE:
+                    newImg = new ImatgeBN(img);
+                    break;
+            }
+            // remove old and add new to list
+            // in the case of a library, remove from all albums as well
+            if(list instanceof BibliotecaImatges) removeImageFromAll(img);
+            else list.removeImage(img);
+            
+            list.addImage(newImg);
+            
+        } catch (Exception e) {
+            return false;
+        }
+
+        return true;
+    }
+
     private ImageList playList;
-    /** Index of the image currently playing */
+    /**
+     * Index of the image currently playing
+     */
     private int plCurrent;
     private JDialog activeDialog;
     private boolean playing = false;
-    
-    public void play(ImageList list){
+
+    public void play(ImageList list) {
         this.playList = list;
-        this.plCurrent = 0;   
+        this.plCurrent = 0;
         this.playing = true;
-        
+
         try {
             startTimer();
         } catch (VisorException ex) {
-            ex.printStackTrace();
         }
     }
-    
-    public void stopPlay(){
+
+    public void stopPlay() {
+        if(!playing) return;
+        
         this.playing = false;
         try {
             stopTimer();
         } catch (VisorException ex) {
-            ex.printStackTrace();
         }
-        
-        if(activeDialog != null) activeDialog.dispose();
+
+        if (activeDialog != null) {
+            activeDialog.dispose();
+        }
     }
 
     @Override
-    public void onTimer(){
+    public void onTimer() {
         // Close previous dialog
-        if(activeDialog != null) activeDialog.dispose();
-        
+        if (activeDialog != null) {
+            activeDialog.dispose();
+        }
 
         try {
             // If we reach the end, stop reproduction
-            if (plCurrent == playList.getSize()){
+            if (plCurrent == playList.getSize()) {
                 stopPlay();
                 return;
             }
-            
+
             // Otherwise keep playing
             activeDialog = playList.getAt(plCurrent).show(false);
             plCurrent++;
@@ -100,7 +136,7 @@ public class CtrlVisor extends BasicCtrl {
             ex.printStackTrace();
         }
     }
-    
+
     /**
      * Helpful method to add an image to a list, only requiring the Image
      * name/tile and the absolute or relative path.
@@ -173,6 +209,7 @@ public class CtrlVisor extends BasicCtrl {
             fis.close();
 
         } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
             return false;
         }
 

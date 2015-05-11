@@ -1,33 +1,35 @@
 package edu.ub.prog2.DempereGuillermoGerman.model;
 
-import edu.ub.prog2.DempereGuillermoGerman.vista.GestioVisorUB;
 import java.util.Date;
 
 import edu.ub.prog2.utils.ImageFile;
-import java.awt.BorderLayout;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Objects;
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 
 /**
  * Class containing an Image file reference and intrinsic data about the image.
  */
 public class Imatge extends ImageFile {
 
+    public enum Type {
+
+        NORMAL,
+        SEPIA,
+        BLACKNWHITE
+    }
+
     private static final long serialVersionUID = -1816757792965439946L;
 
-    private String title;
-    private final Date lastModDate;
-    private final String fileName;
-    private final String filePath;
-    private String fileExt;
+    protected String title;
+    protected final Date lastModDate;
+    protected final String fileName;
+    protected final String filePath;
+    protected String fileExt;
+    protected Imatge.Type type;
 
     /**
      * Creates a new image from a file path. Throws IOException if image file is
@@ -38,6 +40,8 @@ public class Imatge extends ImageFile {
      */
     public Imatge(String filePath) throws FileNotFoundException {
         super(filePath);
+
+        this.type = Type.NORMAL;
 
         if (!exists()) {
             throw new FileNotFoundException("Imatge no trobada");
@@ -52,14 +56,13 @@ public class Imatge extends ImageFile {
         this.fileName = comps[comps.length - 1];
         this.fileExt = this.fileName.split("\\.")[1].toLowerCase();
     }
-    
-    public boolean saveImageToFile(String path) throws IOException{
-        
-        
+
+    public boolean saveImageToFile(String path) throws IOException {
+
         return false;
     }
-    
-        @Override
+
+    @Override
     public JDialog show(boolean modal) throws IOException, Exception {
         JDialog dialog = new JDialog();
         //dialog.setUndecorated(true);
@@ -69,7 +72,7 @@ public class Imatge extends ImageFile {
         dialog.pack();
         dialog.setVisible(true);
         dialog.setResizable(false);
-        
+
         return dialog;
     }
 
@@ -156,7 +159,12 @@ public class Imatge extends ImageFile {
         Imatge img = (Imatge) o;
         // non-identity compare, returns true if the images have the same
         // full path
-        return this.getFullPath().equalsIgnoreCase(img.getFullPath());
+        return this.getFullPath().equalsIgnoreCase(img.getFullPath())
+                && this.type.equals(img.getType());
+    }
+
+    public Imatge.Type getType() {
+        return this.type;
     }
 
     @Override
