@@ -34,16 +34,18 @@ public class AlbumImatges extends LlistaImatges {
         super.addImage(img);
         // Si es la primera imatge que s'afegeix, sera la nova
         // caratula
-        if(getList().size() == 1)
+        if (getList().size() == 1) {
             this.cover = getAt(0);
+        }
     }
 
     @Override
     public void removeImage(ImageFile image) {
         super.removeImage(image);
         // Si ens carregem la caratula, posarla a null
-        if(cover.equals(image))
+        if (cover.equals(image)) {
             this.cover = null;
+        }
     }
 
     // ALBUM METHODS
@@ -74,5 +76,14 @@ public class AlbumImatges extends LlistaImatges {
     @Override
     public String toString() {
         return "[Album] " + this.getTitle() + ", creat per " + this.getAuthor() + ".";
+    }
+
+    public boolean equals(Object o) {
+        if (!(o instanceof AlbumImatges)) 
+            return false;
+    
+        AlbumImatges al = (AlbumImatges) o;
+        
+        return this.title.equalsIgnoreCase(al.getTitle());
     }
 }

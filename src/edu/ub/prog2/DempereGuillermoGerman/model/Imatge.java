@@ -3,6 +3,8 @@ package edu.ub.prog2.DempereGuillermoGerman.model;
 import java.util.Date;
 
 import edu.ub.prog2.utils.ImageFile;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Objects;
@@ -14,9 +16,8 @@ import javax.swing.JLabel;
  * Class containing an Image file reference and intrinsic data about the image.
  */
 public class Imatge extends ImageFile {
-
+    
     public enum Type {
-
         NORMAL,
         SEPIA,
         BLACKNWHITE
@@ -40,7 +41,6 @@ public class Imatge extends ImageFile {
      */
     public Imatge(String filePath) throws FileNotFoundException {
         super(filePath);
-
         this.type = Type.NORMAL;
 
         if (!exists()) {
@@ -60,6 +60,38 @@ public class Imatge extends ImageFile {
     public boolean saveImageToFile(String path) throws IOException {
 
         return false;
+    }
+
+    /**
+     * Returns a new instance of a scaled version of this image.
+     *
+     * @param width
+     * @param height
+     * @param fit If true, the image will be scaled uniformly.
+     * @return
+     */
+    public BufferedImage resizeImage(int width, int height, boolean fit) {
+        BufferedImage inImg = (BufferedImage) this.getImage();
+        // Isomorphic scaling
+        if (fit) {
+            int imgW = inImg.getWidth(null);
+            int imgH = inImg.getHeight(null);
+            float ratio = (float) imgW / imgH;
+            if (imgW > imgH) {
+                // Image is wider than taller
+                height = (int) (width / ratio);
+            } else {
+                // Image is taller than wider
+                width = (int) (height * ratio);
+            }
+        }
+
+        BufferedImage scaledImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        Graphics g = scaledImg.createGraphics();
+        g.drawImage(inImg, 0, 0, width, height, null);
+        g.dispose();
+
+        return scaledImg;
     }
 
     @Override
@@ -126,11 +158,19 @@ public class Imatge extends ImageFile {
         return new Date(lastModDate.getTime());
     }
 
-    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
+        sb.append(title).append(" (").append(fileName).append(")");
+
+        return sb.toString();
+    }
+
+    public String toStringLong() {
+        StringBuilder sb = new StringBuilder();
+
         sb.append("Imatge {");
+        //sb.append(type.toString());
         sb.append("nom: ").append(this.title).append(", ");
         sb.append("data: ").append(this.lastModDate.toString()).append(", ");
         sb.append("nom fitxer: ").append(this.getName()).append(", ");

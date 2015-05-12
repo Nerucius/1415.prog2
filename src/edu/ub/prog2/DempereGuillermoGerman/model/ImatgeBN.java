@@ -7,12 +7,9 @@ package edu.ub.prog2.DempereGuillermoGerman.model;
 
 import edu.ub.prog2.utils.ImageFile;
 import java.awt.Color;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import javax.swing.ImageIcon;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
 
 /**
  *
@@ -25,65 +22,41 @@ public class ImatgeBN extends Imatge {
     public ImatgeBN(String filePath) throws FileNotFoundException {
         super(filePath);
         this.type = Type.BLACKNWHITE;
-        this.imageBN = color2gray();
     }
 
     public ImatgeBN(ImageFile src) throws FileNotFoundException {
-        super(src.getAbsolutePath());
+        this(src.getAbsolutePath());
     }
 
-    @Override
-    public JDialog show(boolean modal) throws IOException, Exception {
-        if (this.imageBN == null) {
-            this.imageBN = color2gray();
-        }
-
-        JDialog dialog = new JDialog();
-        //dialog.setUndecorated(true);
-        JLabel label = new JLabel(new ImageIcon(imageBN));
-        dialog.add(label);
-        dialog.setModal(modal);
-        dialog.pack();
-        dialog.setVisible(true);
-        dialog.setResizable(false);
-
-        return dialog;
+    public Image getImage(){
+        if(imageBN == null)
+            imageBN = applyBWFilter((BufferedImage) getImage());
+        return imageBN;
     }
 
-    private BufferedImage color2gray() {
-        BufferedImage inBufferedImage = (BufferedImage) getImage();
-        int width = inBufferedImage.getWidth();
-        int height = inBufferedImage.getHeight();
-        BufferedImage outImage = new BufferedImage(width, height,
-                BufferedImage.TYPE_3BYTE_BGR);
+    /** Applies a Black&White filter onto an existing buffered image.
+     * 
+     * @param image The BufferedImage to alter.
+     * @return the finished image. Please note that the original reference is
+     * also modified.
+     */
+    public static BufferedImage applyBWFilter(BufferedImage image) {
+        int width = image.getWidth();
+        int height = image.getHeight();
 
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                Color c = new Color(inBufferedImage.getRGB(j, i));
+        for (int w = 0; w < width; w++) {
+            for (int h = 0; h < height; h++) {
+                Color c = new Color(image.getRGB(w, h));
                 int red = (int) (c.getRed() * 0.2126);
                 int green = (int) (c.getGreen() * 0.7152);
                 int blue = (int) (c.getBlue() * 0.0722);
                 Color newColor = new Color(red + green + blue, red + green + blue, red + green + blue);
-                outImage.setRGB(j, i, newColor.getRGB());
+                image.setRGB(w, h, newColor.getRGB());
             }
         }
-
-        return outImage;
+        
+        return image;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("ImatgeBN {");
-        sb.append("nom: ").append(this.title).append(", ");
-        sb.append("data: ").append(this.lastModDate.toString()).append(", ");
-        sb.append("nom fitxer: ").append(this.getName()).append(", ");
-        sb.append("extensio: ").append(this.fileExt).append(", ");
-        sb.append("Cami complet: ").append(this.filePath);
-        sb.append("}");
-
-        return sb.toString();
-    }
 
 }

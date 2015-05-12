@@ -7,12 +7,9 @@ package edu.ub.prog2.DempereGuillermoGerman.model;
 
 import edu.ub.prog2.utils.ImageFile;
 import java.awt.Color;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import javax.swing.ImageIcon;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
 
 /**
  *
@@ -20,7 +17,7 @@ import javax.swing.JLabel;
  */
 public class ImatgeSepia extends Imatge {
 
-    private transient  BufferedImage imageSepia;
+    private transient BufferedImage imageSepia;
 
     public ImatgeSepia(String filePath) throws FileNotFoundException {
         super(filePath);
@@ -29,26 +26,40 @@ public class ImatgeSepia extends Imatge {
     }
 
     public ImatgeSepia(ImageFile src) throws FileNotFoundException {
-        super(src.getAbsolutePath());
+        this(src.getAbsolutePath());
     }
 
     @Override
-    public JDialog show(boolean modal) throws IOException, Exception {
-        if (this.imageSepia == null) {
-            this.imageSepia = color2sepia();
+    public Image getImage() {
+        if(imageSepia == null)
+            imageSepia = applySepiaFilter((BufferedImage) getImage());
+        return imageSepia;
+    }
+
+    public static BufferedImage applySepiaFilter(BufferedImage image) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                Color c = new Color(image.getRGB(j, i));
+                int red = (int) (c.getRed());
+                int green = (int) (c.getGreen());
+                int blue = (int) (c.getBlue());
+                int r = (int) ((red * 0.393) + (green * 0.769) + (blue * 0.189));
+                int g = (int) ((red * 0.349) + (green * 0.686) + (blue * 0.168));
+                int b = (int) ((red * 0.272) + (green * 0.534) + (blue * 0.131));
+                r = Math.min(r, 255);
+                g = Math.min(g, 255);
+                b = Math.min(b, 255);
+                Color newColor = new Color(r, g, b);
+                image.setRGB(j, i, newColor.getRGB());
+            }
         }
 
-        JDialog dialog = new JDialog();
-        //dialog.setUndecorated(true);
-        JLabel label = new JLabel(new ImageIcon(imageSepia));
-        dialog.add(label);
-        dialog.setModal(modal);
-        dialog.pack();
-        dialog.setVisible(true);
-        dialog.setResizable(false);
-
-        return dialog;
+        return image;
     }
+
 
     private BufferedImage color2sepia() {
         BufferedImage inBufferedImage = (BufferedImage) getImage();
@@ -65,15 +76,9 @@ public class ImatgeSepia extends Imatge {
                 int r = (int) ((red * 0.393) + (green * 0.769) + (blue * 0.189));
                 int g = (int) ((red * 0.349) + (green * 0.686) + (blue * 0.168));
                 int b = (int) ((red * 0.272) + (green * 0.534) + (blue * 0.131));
-                if (r > 255) {
-                    r = 255;
-                }
-                if (g > 255) {
-                    g = 255;
-                }
-                if (b > 255) {
-                    b = 255;
-                }
+                r = Math.min(r, 255);
+                g = Math.min(g, 255);
+                b = Math.min(b, 255);
                 Color newColor = new Color(r, g, b);
                 outImage.setRGB(j, i, newColor.getRGB());
             }
@@ -81,19 +86,5 @@ public class ImatgeSepia extends Imatge {
         return (outImage);
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("ImatgeSepia {");
-        sb.append("nom: ").append(this.title).append(", ");
-        sb.append("data: ").append(this.lastModDate.toString()).append(", ");
-        sb.append("nom fitxer: ").append(this.getName()).append(", ");
-        sb.append("extensio: ").append(this.fileExt).append(", ");
-        sb.append("Cami complet: ").append(this.filePath);
-        sb.append("}");
-
-        return sb.toString();
-    }
 
 }

@@ -339,10 +339,11 @@ public class VisorUB3 implements VisorUB {
     private void playListForm(ImageList list) {
         System.out.print("Temps de repoducció en ms: ");
         ctrl.setTimer(Integer.parseInt(sc.nextLine()));
-        ctrl.play(list);
+        ctrl.play(list.getSize());
+        // BROKEN CODE! Timer now uses a listener
         System.out.print("Prem enter per terminar...");
         sc.nextLine();
-        ctrl.stopPlay();
+        ctrl.stop();
 
     }
 
@@ -418,7 +419,7 @@ public class VisorUB3 implements VisorUB {
                 if (success) {
                     System.out.println("Imatge transformada correctament");
                     return;
-                }else{
+                } else {
                     System.out.println("Error en la transformació");
                     return;
                 }
@@ -445,12 +446,11 @@ public class VisorUB3 implements VisorUB {
         System.out.print("Numero maxim d'imatges: ");
         int alCap = sc.nextInt();
 
-        AlbumImatges album = new AlbumImatges(Math.max(1, alCap));
-        album.setTitle(alTitle);
-        album.setAuthor(alAuthor);
-        ctrl.getData().addAlbum(album);
-
-        System.out.println("\nAlbum afegit correctament.");
+        if (ctrl.addAlbum(alTitle, alAuthor, Math.max(1, alCap))) {
+            System.out.println("\nAlbum afegit correctament.");
+        } else {
+            System.out.println("\nAlbum Duplicat.");
+        }
     }
 
     private void removeAlbumForm() {
