@@ -1,13 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.ub.prog2.DempereGuillermoGerman.model;
 
 import edu.ub.prog2.utils.ImageFile;
 import java.awt.Color;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
 
@@ -16,8 +10,6 @@ import java.io.FileNotFoundException;
  * @author Akira
  */
 public class ImatgeBN extends Imatge {
-
-    private transient BufferedImage imageBN;
 
     public ImatgeBN(String filePath) throws FileNotFoundException {
         super(filePath);
@@ -28,10 +20,9 @@ public class ImatgeBN extends Imatge {
         this(src.getAbsolutePath());
     }
 
-    public Image getImage(){
-        if(imageBN == null)
-            imageBN = applyBWFilter((BufferedImage) getImage());
-        return imageBN;
+    @Override
+    protected void applyFilter(){
+	ImatgeBN.applyBWFilter(buffer);
     }
 
     /** Applies a Black&White filter onto an existing buffered image.
@@ -50,12 +41,17 @@ public class ImatgeBN extends Imatge {
                 int red = (int) (c.getRed() * 0.2126);
                 int green = (int) (c.getGreen() * 0.7152);
                 int blue = (int) (c.getBlue() * 0.0722);
-                Color newColor = new Color(red + green + blue, red + green + blue, red + green + blue);
+                Color newColor = new Color(red + green + blue, red + green + blue, red + green + blue, c.getAlpha());
                 image.setRGB(w, h, newColor.getRGB());
             }
         }
         
         return image;
+    }
+    
+    @Override
+    public String toString(){
+	return "BN | "+super.toString();
     }
 
 

@@ -14,7 +14,7 @@ public class DadesVisor implements Serializable {
         albums = new ArrayList<AlbumImatges>();
     }
 
-    public ImageList getLib() {
+    public BibliotecaImatges getLib() {
         return this.lib;
     }
 

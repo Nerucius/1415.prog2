@@ -3,6 +3,7 @@ package edu.ub.prog2.DempereGuillermoGerman.model;
 import edu.ub.prog2.utils.ImageFile;
 import edu.ub.prog2.utils.ImageList;
 import edu.ub.prog2.utils.VisorException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -10,7 +11,7 @@ import java.util.Iterator;
  * Second implementation of ImageList, this time using an ArrayList as the
  * backing array for the images.
  */
-public class LlistaImatges extends ImageList {
+public class LlistaImatges extends ImageList implements Serializable {
 
     private static final long serialVersionUID = 516176151684615L;
     protected int maxCap;

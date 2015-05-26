@@ -4,9 +4,9 @@ import edu.ub.prog2.utils.ImageFile;
 import edu.ub.prog2.utils.VisorException;
 
 /**
- * Classe del album d'imatges. Guarda imatges repetides o no en una llista de
- * capacitat donada per parametre en el constructor.
- *
+ * Classe del album d'imatges. Manté un numero limitat de referencies (repetides
+ * o no) que provenen de la llibreria.
+ * 
  * Te una imatge que s'usa com a portada.
  *
  * @author German
@@ -75,7 +75,7 @@ public class AlbumImatges extends LlistaImatges {
 
     @Override
     public String toString() {
-        return "[Album] " + this.getTitle() + ", creat per " + this.getAuthor() + ".";
+        return "Album: " + getTitle() + ", creat per " + getAuthor() + ".";
     }
 
     public boolean equals(Object o) {
@@ -85,5 +85,14 @@ public class AlbumImatges extends LlistaImatges {
         AlbumImatges al = (AlbumImatges) o;
         
         return this.title.equalsIgnoreCase(al.getTitle());
+    }
+
+    public int getCap() {
+	return maxCap;
+    }
+    
+    /** Sets the cap to match either the given one, or the current size of the album */
+    public void setCap(int cap){
+	this.maxCap = Math.max(this.getSize(), cap);	
     }
 }

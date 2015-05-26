@@ -4,6 +4,13 @@ import edu.ub.prog2.utils.ImageFile;
 import edu.ub.prog2.utils.VisorException;
 import java.util.Iterator;
 
+/** Classe que defineix una biblioteca d'imatges amb imatges no repetides.
+ * Les Imatges guardades en aquesta llista son les referencies originals, i tota
+ * Imatge guardada a altres llites (Albums etc.) han de ser referencies adicionals
+ * a les imatges d'aquesta llista.
+ * 
+ * @author German
+ */
 public class BibliotecaImatges extends LlistaImatges {
 
     public BibliotecaImatges() {
@@ -23,5 +30,10 @@ public class BibliotecaImatges extends LlistaImatges {
                 throw new VisorException("Imatge duplicada");
         
         super.addImage(image);
+    }
+    
+    @Override
+    public String toString(){
+        return "Biblioteca: "+getSize()+" Imatges.";
     }
 }

@@ -6,11 +6,12 @@ import edu.ub.prog2.DempereGuillermoGerman.model.DadesVisor;
 import edu.ub.prog2.DempereGuillermoGerman.model.Imatge;
 import edu.ub.prog2.DempereGuillermoGerman.model.ImatgeBN;
 import edu.ub.prog2.DempereGuillermoGerman.model.ImatgeSepia;
-import edu.ub.prog2.DempereGuillermoGerman.vista.Listener.VisorTimerListener;
+import edu.ub.prog2.DempereGuillermoGerman.vista.listener.VisorTimerListener;
 import edu.ub.prog2.utils.BasicCtrl;
 import edu.ub.prog2.utils.ImageFile;
 import edu.ub.prog2.utils.ImageList;
 import edu.ub.prog2.utils.VisorException;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -30,58 +31,124 @@ public class CtrlVisor extends BasicCtrl {
     private ArrayList<VisorTimerListener> listeners;
 
     public CtrlVisor() {
-        this.data = new DadesVisor();
-        listeners = new ArrayList<VisorTimerListener>();
+	this.data = new DadesVisor();
+	listeners = new ArrayList<VisorTimerListener>();
     }
 
     /**
      * Method to remove from all albums and finally from the library
      */
     public boolean removeImageFromAll(ImageFile img) {
-        try {
-            for (ImageList al : getData().getAlbums()) {
-                al.removeImage(img);
-            }
-            getData().getLib().removeImage(img);
-        } catch (Exception e) {
-            return false;
-        }
+	try {
+	    for (ImageList al : getData().getAlbums()) {
+		al.removeImage(img);
+	    }
+	    getData().getLib().removeImage(img);
+	} catch (Exception e) {
+	    return false;
+	}
 
-        return true;
+	return true;
 
     }
 
+    public boolean transformImageFromList(Imatge oldImg, ImageList list, Imatge.Type type) {
+	Imatge newImg = null;
+	System.out.println("Transform image: " + type.toString());
+	try {
+	    if (type == Imatge.Type.NORMAL) newImg = new Imatge(oldImg);
+	    if (type == Imatge.Type.SEPIA) newImg = new ImatgeSepia(oldImg);
+	    if (type == Imatge.Type.BLACKNWHITE) newImg = new ImatgeBN(oldImg);
+
+	    // Save new image
+	    BufferedImage outBuffer = (BufferedImage)newImg.getImage();
+	    String outPath = newImg.getAbsolutePath();
+
+	    // Generate new filename for out file
+	    outPath = outPath.replaceAll(newImg.getFilename(),
+		    newImg.getFilename() + "_" + type.name().toLowerCase());
+	    outPath = outPath.replaceAll(newImg.getExtension(), "png");
+
+	    File outFile = new File(outPath);
+
+	    System.out.println(outPath);
+
+	    ImageIO.write(outBuffer, "png", outFile);
+
+	    newImg = new Imatge(outFile.getAbsolutePath());
+	    newImg.setTitle(oldImg.getTitle());
+
+	    // Replace everywhere if library, otherwise replace in album
+	    if (list == data.getLib()) {
+		replaceOccurences(oldImg, newImg, data.getLib());
+		for (AlbumImatges al : data.getAlbums())
+		    replaceOccurences(oldImg, newImg, al);
+	    } else {
+		replaceOccurences(oldImg, newImg, list);
+	    }
+
+	    return true;
+	} catch (Exception e) {
+	    System.out.println("Failed to create new Image");
+	    e.printStackTrace();
+	    return false;
+	}
+    }
+
+    /**
+     * Replaced all ocurrences of oldImg inside the list by newImg, conserving indices.
+     */
+    private void replaceOccurences(ImageFile oldImg, ImageFile newImg, ImageList list) {
+	ArrayList<ImageFile> array = list.getList();
+	ArrayList<ImageFile> temp = new ArrayList<>();
+
+	// Replace ops into temp array
+	for (ImageFile img : array)
+	    if (img.equals(oldImg))
+		temp.add(newImg);
+	    else
+		temp.add(img);
+
+	// Copy over array
+	array.clear();
+	array.addAll(temp);
+    }
+
+    /**
+     * Method for old Visors
+     */
+    @Deprecated
     public boolean transformImage(ImageFile img, ImageList list, Imatge.Type type) {
-        Imatge newImg = null;
+	Imatge newImg = null;
 
-        try {
-            // Create new Image
-            switch (type) {
-                case NORMAL:
-                    newImg = new Imatge(img.getAbsolutePath());
-                    break;
-                case SEPIA:
-                    newImg = new ImatgeSepia(img);
-                    break;
-                case BLACKNWHITE:
-                    newImg = new ImatgeBN(img);
-                    break;
-            }
-            // remove old and add new to list
-            // in the case of a library, remove from all albums as well
-            if (list instanceof BibliotecaImatges) {
-                removeImageFromAll(img);
-            } else {
-                list.removeImage(img);
-            }
+	try {
+	    // Create new Image
+	    switch (type) {
+		case NORMAL:
+		    newImg = new Imatge(img.getAbsolutePath());
+		    break;
+		case SEPIA:
+		    newImg = new ImatgeSepia(img);
+		    break;
+		case BLACKNWHITE:
+		    newImg = new ImatgeBN(img);
+		    break;
+	    }
+	    // remove old and add new to list
+	    // in the case of a library, remove from all albums as well
+	    if (list instanceof BibliotecaImatges) {
+		removeImageFromAll(img);
+	    } else {
+		list.removeImage(img);
+	    }
 
-            list.addImage(newImg);
+	    list.addImage(newImg);
 
-        } catch (Exception e) {
-            return false;
-        }
+	} catch (Exception e) {
+	    return false;
+	}
 
-        return true;
+	return true;
     }
 
     private int numItems;
@@ -93,81 +160,85 @@ public class CtrlVisor extends BasicCtrl {
      * Adds a new listener to the timer scheduling events.
      */
     public void addTimerListener(VisorTimerListener ls) {
-        listeners.add(ls);
+	listeners.add(ls);
     }
+
+    private ArrayList<Integer> play_order;
 
     /**
      * Begins the timer ticking
+     *
+     * @param numItems The number of items to tick for.
      */
-    public void play(int nItems) {
-        if (playing) {
-            return;
-        }
-        if (!paused) {
-            cIndex = 0;
-        }
+    public void play(int numItems) {
+	if (playing) {
+	    return;
+	}
+	if (!paused) {
+	    cIndex = 0;
+	}
 
-        if (!paused) {
-            // Start code
-            for (VisorTimerListener listener : listeners) {
-                listener.onStart();
-            }
+	if (!paused) {
+	    // Start code
+	    for (VisorTimerListener listener : listeners) {
+		listener.onStart();
+	    }
 
-            numItems = nItems;
-            playing = true;
-            // Call the first tick inmediately
-            onTimer();
+	    this.numItems = numItems;
+	    playing = true;
+	    // Call the first tick inmediately
+	    onTimer();
 
-        } else {
-            // Resume code
-            for (VisorTimerListener listener : listeners) {
-                listener.onResume();
-            }
+	} else {
+	    // Resume code
+	    for (VisorTimerListener listener : listeners) {
+		listener.onResume();
+	    }
 
-            paused = false;
-        }
+	    paused = false;
+	}
 
-        try {
-            this.startTimer();
-        } catch (VisorException e) {
-        }
+	try {
+	    this.startTimer();
+	} catch (VisorException e) {
+	}
     }
 
     /**
      * Pause the current timer. Does not reset the index.
      */
     public void pause() {
-        if (!playing || paused) {
-            return;
-        }
-        paused = true;
+	if (!playing || paused) {
+	    return;
+	}
+	paused = true;
 
-        for (VisorTimerListener listener : listeners) {
-            listener.onPause();
-        }
+	for (VisorTimerListener listener : listeners) {
+	    listener.onPause();
+	}
 
-        try {
-            this.stopTimer();
-            this.playing = false;
-        } catch (VisorException e) {
-        }
+	try {
+	    this.stopTimer();
+	    this.playing = false;
+	} catch (VisorException e) {
+	}
     }
 
     /**
      * Stops the timer and resets the index
      */
     public void stop() {
-        if (paused) paused = false;
-        this.playing = false;
-        
-        for (VisorTimerListener listener : listeners) {
-            listener.onStop();
-        }
-        
-        try {
-            stopTimer();
-        } catch (VisorException e) {
-        }
+	if (paused) paused = false;
+	this.playing = false;
+
+	for (VisorTimerListener listener : listeners) {
+	    listener.onStop();
+	}
+
+	try {
+	    stopTimer();
+	} catch (VisorException e) {
+	}
 
     }
 
@@ -176,60 +247,58 @@ public class CtrlVisor extends BasicCtrl {
      */
     @Override
     public void onTimer() {
-        for (VisorTimerListener listener : listeners) {
-            listener.onTimer(cIndex);
-        }
+	for (VisorTimerListener listener : listeners) {
+	    listener.onTimer(cIndex);
+	}
 
-        cIndex++;
-        // Finish status
-        if (cIndex == numItems) {
-            for (VisorTimerListener listener : listeners) {
-                listener.onFinish();
-            }
-            try {
-                stopTimer();
-                playing =  false;
-                paused = false;
-            }catch(VisorException e){}
-        }
+	cIndex++;
+	// Finish status
+	if (cIndex == numItems) {
+	    for (VisorTimerListener listener : listeners) {
+		listener.onFinish();
+	    }
+	    try {
+		stopTimer();
+		playing = false;
+		paused = false;
+	    } catch (VisorException e) {
+	    }
+	}
     }
 
     /**
      * Change the timer value on the fly.
      */
     public void changeTimer(int ms) {
-        setTimer(ms);
-        if (playing) {
-            try {
-                startTimer();
-            } catch (Exception e) {
-            }
-        }
+	setTimer(ms);
+	if (playing) {
+	    try {
+		startTimer();
+	    } catch (Exception e) {
+	    }
+	}
     }
 
     /**
-     * Helpful method to add an image to a list, only requiring the Image
-     * name/tile and the absolute or relative path.
+     * Helpful method to add an image to a list, only requiring the Image name/tile and the absolute
+     * or relative path.
      */
     public boolean addImageToList(String imgName, String imgPath, ImageList list) {
-        try {
-            Imatge newImg = new Imatge(imgPath);
-            if (ImageIO.read(new File(imgPath)) == null) {
-                return false;
-            }
+	try {
+	    Imatge newImg = new Imatge(imgPath);
 
-            newImg.setTitle(imgName);
-            list.addImage(newImg);
+	    newImg.setTitle(imgName);
+	    list.addImage(newImg);
 
-            return true;
-        } catch (VisorException | IOException ex) {
-            System.out.println(ex.getMessage());
-            return false;
-        }
+	    return true;
+	} catch (VisorException | IOException ex) {
+	    System.out.println(ex.getMessage());
+	    return false;
+	}
     }
 
     public DadesVisor getData() {
-        return data;
+	return data;
     }
 
     /**
@@ -239,77 +308,81 @@ public class CtrlVisor extends BasicCtrl {
      * @return Operation success status
      */
     public boolean saveDataToObjectStream(String filePath) {
-        FileOutputStream fos;
-        ObjectOutputStream oos;
+	FileOutputStream fos;
+	ObjectOutputStream oos;
 
-        try {
-            // Write data
-            fos = new FileOutputStream(filePath, false);
-            oos = new ObjectOutputStream(fos);
-            oos.writeObject(data);
+	try {
+	    // Write data
+	    fos = new FileOutputStream(filePath, false);
+	    oos = new ObjectOutputStream(fos);
+	    oos.writeObject(data);
 
-            // Close streams
-            oos.close();
-            fos.close();
+	    // Close streams
+	    oos.close();
+	    fos.close();
 
-        } catch (IOException e) {
-            return false;
-        }
+	} catch (IOException e) {
+	    return false;
+	}
 
-        return true;
+	return true;
 
     }
 
     /**
-     * Loads a list from a file as a serialized object. Overwrites all images
-     * currently in the list.
+     * Loads a list from a file as a serialized object. Overwrites all images currently in the list.
      *
      * @param filePath path of the file containing the list
      * @return Operation success status
      */
     public boolean loadDataFromObjectStream(String filePath) {
-        FileInputStream fis;
-        ObjectInputStream ois;
-        DadesVisor newData = null;
+	FileInputStream fis;
+	ObjectInputStream ois;
+	DadesVisor newData = null;
 
-        try {
-            // Read data
-            fis = new FileInputStream(filePath);
-            ois = new ObjectInputStream(fis);
-            newData = (DadesVisor) ois.readObject();
+	try {
+	    // Read data
+	    fis = new FileInputStream(filePath);
+	    ois = new ObjectInputStream(fis);
+	    newData = (DadesVisor)ois.readObject();
 
-            // Close streams
-            ois.close();
-            fis.close();
+	    // Close streams
+	    ois.close();
+	    fis.close();
 
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-            return false;
-        }
+	} catch (IOException | ClassNotFoundException e) {
+	    //e.printStackTrace();
+	    System.out.println(e.getMessage());
+	    return false;
+	}
 
-        if (newData == null) {
-            return false;
-        }
+	if (newData == null) {
+	    return false;
+	}
 
-        this.data = newData;
-        return true;
+	this.data = newData;
+	return true;
     }
 
     public boolean addAlbum(String alTitle, String alAuthor, int cap) {
-        AlbumImatges album = new AlbumImatges(cap);
-        album.setTitle(alTitle);
-        album.setAuthor(alAuthor);
+	// Basic property checking
+	if (alTitle.length() <= 0 || alAuthor.length() <= 0 || cap <= 0)
+	    return false;
 
-        if (data.getAlbums().contains(album)) {
-            return false;
-        }
+	AlbumImatges album = new AlbumImatges(cap);
+	album.setTitle(alTitle);
+	album.setAuthor(alAuthor);
 
-        data.addAlbum(album);
-        return true;
+	if (data.getAlbums().contains(album)) {
+	    return false;
+	}
+
+	data.addAlbum(album);
+	return true;
     }
 
     public void removeAlbum(ImageList currentList) {
-        data.removeAlbum((AlbumImatges) currentList);
+	data.removeAlbum((AlbumImatges)currentList);
     }
 
 }
