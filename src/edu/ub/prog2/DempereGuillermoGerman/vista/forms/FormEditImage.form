@@ -120,7 +120,7 @@
           <ComponentRef name="jImageFiltersGroup"/>
         </Property>
         <Property name="selected" type="boolean" value="true"/>
-        <Property name="text" type="java.lang.String" value="Normal"/>
+        <Property name="text" type="java.lang.String" value="Sense canvi"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JRadioButton" name="jSepiaFilter">

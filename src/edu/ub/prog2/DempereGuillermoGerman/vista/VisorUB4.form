@@ -340,10 +340,9 @@
         <Component class="javax.swing.JSlider" name="jSpeedSlider">
           <Properties>
             <Property name="majorTickSpacing" type="int" value="1000"/>
-            <Property name="maximum" type="int" value="3000"/>
+            <Property name="maximum" type="int" value="5000"/>
             <Property name="minorTickSpacing" type="int" value="500"/>
             <Property name="paintTicks" type="boolean" value="true"/>
-            <Property name="snapToTicks" type="boolean" value="true"/>
             <Property name="value" type="int" value="1000"/>
           </Properties>
         </Component>

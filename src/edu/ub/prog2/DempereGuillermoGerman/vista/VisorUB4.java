@@ -37,6 +37,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.JSlider;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
@@ -65,15 +66,6 @@ public class VisorUB4 extends javax.swing.JFrame {
 	initComponents();
 	if (DEBUG) System.out.println("Created GUI.");
 
-	/*
-	 ctrl.addAlbum("Fortress", "Al1", 10);
-	 ctrl.addAlbum("Vacation", "Mom", 10);
-	 ctrl.addImageToList("Earth", "img/earth.jpg", ctrl.getData().getLib());
-	 ctrl.addImageToList("Earth-Half", "img/earth-half.jpg", ctrl.getData().getLib());
-	 ctrl.addImageToList("Sunset", "img/sunset.jpg", ctrl.getData().getLib());
-	 ctrl.addImageToList("Highway", "img/highway.jpg", ctrl.getData().getAlbum(0));
-	 ctrl.addImageToList("Sunset", "img/sunset.jpg", ctrl.getData().getAlbum(1));
-	 */
 	ctrl = new CtrlVisor();
 	ctrl.addTimerListener(new CustomTimerListener());
 	ctrl.setTimer(1000);
@@ -88,10 +80,17 @@ public class VisorUB4 extends javax.swing.JFrame {
 	jSpeedSlider.addChangeListener(new ChangeListener() {
 	    @Override
 	    public void stateChanged(ChangeEvent e) {
+		// Update the speed text field, minimun 100 ms
 		int speed = Math.max(100, jSpeedSlider.getValue());
 		jPlaySpeed.setText(speed + " ms");
-		// Limit max speed to 100 ms delay
-		ctrl.setTimer(speed);
+
+		// If the user hasn't released the mouse yet, do nothing
+		if (((JSlider)e.getSource()).getValueIsAdjusting())
+		    return;
+
+		// If playing, ignore
+		if (!ctrl.isPlaying())
+		    ctrl.setTimer(speed);
 	    }
 	});
 
@@ -194,7 +193,7 @@ public class VisorUB4 extends javax.swing.JFrame {
 	    ImatgeSepia.applySepiaFilter(tempBufferImg);
 
 	jImageLabel.setIcon(new ImageIcon(tempBufferImg));
-	//jImageLabel.setIcon(new ImageIcon(img.getBufferedImage()));
+	jImageLabel.setText("");
     }
 
     /**
@@ -364,10 +363,9 @@ public class VisorUB4 extends javax.swing.JFrame {
         jPlaySpeed.setText("1000 ms");
 
         jSpeedSlider.setMajorTickSpacing(1000);
-        jSpeedSlider.setMaximum(3000);
+        jSpeedSlider.setMaximum(5000);
         jSpeedSlider.setMinorTickSpacing(500);
         jSpeedSlider.setPaintTicks(true);
-        jSpeedSlider.setSnapToTicks(true);
         jSpeedSlider.setValue(1000);
 
         jLabel1.setText("Velocidat:");
@@ -723,7 +721,8 @@ public class VisorUB4 extends javax.swing.JFrame {
 	    if (jShufflePlay.isSelected())
 		Collections.shuffle(playOrder);
 
-	    System.out.println(playOrder.toString());
+	    if (DEBUG) System.out.println(playOrder.toString());
+	    ctrl.setTimer(jSpeedSlider.getValue());
 	    ctrl.play(currentList.getSize());
 	} else {
 	    JOptionPane.showMessageDialog(this, "La llista es massa petita per fer Play.");
@@ -776,8 +775,6 @@ public class VisorUB4 extends javax.swing.JFrame {
 	// <editor-fold defaultstate="collapsed" desc="CustomTimerListener code for list playback code.">
 	@Override
 	public void onStart() {
-	    //showImage((Imatge)currentList.getAt(0));
-
 	    jPlaylistProgress.setMinimum(0);
 	    jPlaylistProgress.setValue(0);
 	    jPlaylistProgress.setMaximum(currentList.getSize());
@@ -791,7 +788,6 @@ public class VisorUB4 extends javax.swing.JFrame {
 	@Override
 	public void onTimer(int index) {
 	    int next = playOrder.pop();
-	    System.out.println(next + "");
 
 	    showImage((Imatge)currentList.getAt(next));
 	    jPlaylistProgress.setValue(index + 1);

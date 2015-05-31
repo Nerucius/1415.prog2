@@ -53,6 +53,8 @@ public class CtrlVisor extends BasicCtrl {
     }
 
     public boolean transformImageFromList(Imatge oldImg, ImageList list, Imatge.Type type) {
+	if (type == Imatge.Type.NORMAL) return false;
+
 	Imatge newImg = null;
 	System.out.println("Transform image: " + type.toString());
 	try {
@@ -78,15 +80,20 @@ public class CtrlVisor extends BasicCtrl {
 	    newImg = new Imatge(outFile.getAbsolutePath());
 	    newImg.setTitle(oldImg.getTitle());
 
-	    // Replace everywhere if library, otherwise replace in album
-	    if (list == data.getLib()) {
-		replaceOccurences(oldImg, newImg, data.getLib());
-		for (AlbumImatges al : data.getAlbums())
-		    replaceOccurences(oldImg, newImg, al);
-	    } else {
-		replaceOccurences(oldImg, newImg, list);
-	    }
+	    // Replace everywhere always
+	    replaceOccurences(oldImg, newImg, data.getLib());
+	    for (AlbumImatges al : data.getAlbums())
+		replaceOccurences(oldImg, newImg, al);
 
+	    /* Replace everywhere only if in library
+	     if (list == data.getLib()) {
+	     replaceOccurences(oldImg, newImg, data.getLib());
+	     for (AlbumImatges al : data.getAlbums())
+	     replaceOccurences(oldImg, newImg, al);
+	     } else {
+	     replaceOccurences(oldImg, newImg, list);
+	     }
+	     */
 	    return true;
 	} catch (Exception e) {
 	    System.out.println("Failed to create new Image");
@@ -163,6 +170,10 @@ public class CtrlVisor extends BasicCtrl {
 	listeners.add(ls);
     }
 
+    public boolean isPlaying(){
+	return playing;
+    }
+    
     private ArrayList<Integer> play_order;
 
     /**
@@ -285,16 +296,17 @@ public class CtrlVisor extends BasicCtrl {
      */
     public boolean addImageToList(String imgName, String imgPath, ImageList list) {
 	try {
+	    // Create new image, set the title and add to the given list.
 	    Imatge newImg = new Imatge(imgPath);
-
 	    newImg.setTitle(imgName);
 	    list.addImage(newImg);
 
-	    return true;
 	} catch (VisorException | IOException ex) {
+	    // Image not found or file corrupted
 	    System.out.println(ex.getMessage());
 	    return false;
 	}
+	return true;
     }
 
     public DadesVisor getData() {

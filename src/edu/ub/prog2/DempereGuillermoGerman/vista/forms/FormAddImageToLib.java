@@ -6,7 +6,6 @@
 package edu.ub.prog2.DempereGuillermoGerman.vista.forms;
 
 import edu.ub.prog2.DempereGuillermoGerman.controlador.CtrlVisor;
-import edu.ub.prog2.DempereGuillermoGerman.model.Imatge;
 import edu.ub.prog2.utils.ImageList;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -122,7 +121,7 @@ public class FormAddImageToLib extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jBrowseFilesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBrowseFilesButtonActionPerformed
-	JFileChooser fc = new JFileChooser(".");
+	JFileChooser fc = new JFileChooser("./img");
 	// If file is chosen
 	if (fc.showDialog(this, null) == JFileChooser.APPROVE_OPTION) {
 	    jFilePath.setText(fc.getSelectedFile().getAbsolutePath());
@@ -135,13 +134,9 @@ public class FormAddImageToLib extends javax.swing.JFrame {
     }//GEN-LAST:event_jCancelActionPerformed
 
     private void jAddImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jAddImageActionPerformed
-	if (ctrl.addImageToList(jFileTitle.getText(), jFilePath.getText(), lib)) {
-	    //JOptionPane.showMessageDialog(this, "Imatge afegida correctament.");
-	} else {
-	    JOptionPane.showMessageDialog(
-		    this, "Error afegint la nova clase.", "Error", JOptionPane.ERROR_MESSAGE);
-	}
-	//this.setVisible(false);
+	if (!ctrl.addImageToList(jFileTitle.getText(), jFilePath.getText(), lib))
+	    JOptionPane.showMessageDialog(this, "Error afegint la Imatge.", "Error", JOptionPane.ERROR_MESSAGE);
+
 	this.dispose();
     }//GEN-LAST:event_jAddImageActionPerformed
 

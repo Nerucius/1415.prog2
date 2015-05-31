@@ -36,29 +36,8 @@ public class FormEditImage extends javax.swing.JFrame {
 	this.list = list;
 	initComponents();
 
-	// Set title
+	// Set text field to title
 	jTextImageTitle.setText(image.getTitle());
-
-	// Check image type
-	if (image instanceof ImatgeBN) jBWFilter.setSelected(true);
-	if (image instanceof ImatgeSepia) jSepiaFilter.setSelected(true);
-
-	// Add dirty listeners
-	ActionListener al = new DirtyActionListener();
-	jNormalFilter.addActionListener(al);
-	jBWFilter.addActionListener(al);
-	jSepiaFilter.addActionListener(al);
-    }
-
-    /**
-     * Very basic class that sets the dirty flag to true if the user selects a different filter
-     */
-    private class DirtyActionListener implements ActionListener {
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-	    dirtyImage = true;
-	}
     }
 
     /**
@@ -104,7 +83,7 @@ public class FormEditImage extends javax.swing.JFrame {
 
         jImageFiltersGroup.add(jNormalFilter);
         jNormalFilter.setSelected(true);
-        jNormalFilter.setText("Normal");
+        jNormalFilter.setText("Sense canvi");
 
         jImageFiltersGroup.add(jSepiaFilter);
         jSepiaFilter.setText("Sèpia");
@@ -169,15 +148,10 @@ public class FormEditImage extends javax.swing.JFrame {
 	if (jTextImageTitle.getText().length() > 0)
 	    image.setTitle(jTextImageTitle.getText());
 
-	if (dirtyImage) {
-	    // Change the image type
-	    if (jNormalFilter.isSelected())
-		ctrl.transformImageFromList(image, list,  Imatge.Type.NORMAL);
-	    else if (jSepiaFilter.isSelected())
-		ctrl.transformImageFromList(image, list, Imatge.Type.SEPIA);
-	    else if (jBWFilter.isSelected())
-		ctrl.transformImageFromList(image, list, Imatge.Type.BLACKNWHITE);
-	}
+	if (jSepiaFilter.isSelected())
+	    ctrl.transformImageFromList(image, list, Imatge.Type.SEPIA);
+	else if (jBWFilter.isSelected())
+	    ctrl.transformImageFromList(image, list, Imatge.Type.BLACKNWHITE);
 
 	this.dispose();
     }//GEN-LAST:event_jAcceptActionPerformed
